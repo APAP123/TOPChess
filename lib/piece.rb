@@ -1,6 +1,7 @@
 # Base class for all game pieces to inherit from
 # Perhaps run inbound before valid_move?(); that would save a few rewrites.
 class Piece
+  attr_reader :color
   def initialize(color)
     # todo
     @color = color # 1 for white, -1 for black
@@ -44,7 +45,12 @@ class Piece
 
     true
   end
-end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    ' '
+  end
+end/
 
 # Class representation of the Pawn piece
 class Pawn < Piece
@@ -65,6 +71,11 @@ class Pawn < Piece
     end
     false
   end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♙' : '♟'
+  end
 end
 
 # Class representation of the Rook piece
@@ -75,6 +86,11 @@ class Rook < Piece
     return true if location[0] == goal[0] || location[1] == goal[1]
 
     false
+  end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♖' : '♜'
   end
 end
 
@@ -89,6 +105,11 @@ class Bishop < Piece
 
     false
   end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♗' : '♝'
+  end
 end
 
 # Class representation of the Queen piece
@@ -99,6 +120,11 @@ class Queen < Piece
     return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
 
     false
+  end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♕' : '♛'
   end
 end
 
@@ -129,5 +155,27 @@ class Knight < Piece
     end
 
     valid_spaces.include? goal
+  end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♘' : '♞'
+  end
+end
+
+# Class representation of the King piece
+class King < Piece
+  def valid_move?(location, goal)
+    # Same as Queen, but can only move one space in any direction.
+    y_factor = (location[0] - goal[0]).abs
+    x_factor = (location[1] - goal[1]).abs
+    eturn false if y_factor > 1 || x_factor > 1
+
+    true
+  end
+
+  # Returns the Piece's unicode representation
+  def draw_me
+    @color == 1 ? '♔' : '♚'
   end
 end
