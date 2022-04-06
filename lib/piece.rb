@@ -1,4 +1,5 @@
 # Base class for all game pieces to inherit from
+# Perhaps run inbound before valid_move?(); that would save a few rewrites.
 class Piece
   def initialize(color)
     # todo
@@ -71,10 +72,62 @@ class Rook < Piece
   def valid_move?(location, goal)
     # check if goal is straight line (i.e. one of the axii must remain the same)
     # Then need to make sure no pieces are between it and goal
-    if (location[0] == goal[0] || location[1] == goal[1]) & inbounds?(goal)
-      return true
-    end
+    return true if location[0] == goal[0] || location[1] == goal[1]
 
     false
+  end
+end
+
+# Class representation of the Bishop piece
+class Bishop < Piece
+  def valid_move?(location, goal)
+    # For a Bishop's move to be valid, both axii must change from location to goal
+    # In addition, the factor of change must be equal for the two axii
+    # i.e., both axii should change by the same absolute value
+    # return true if location[0] != goal[0] && location[1] != goal[1] # this is probably redundant
+    return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
+
+    false
+  end
+end
+
+# Class representation of the Queen piece
+class Queen < Piece
+  def valid_move?(location, goal)
+    # The Queen has the combined movement of the rook and bishop
+    return true if location[0] == goal[0] || location[1] == goal[1]
+    return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
+
+    false
+  end
+end
+
+# Class representation of the Knight piece
+class Knight < Piece
+  # Since the Knight can hop over pieces,
+  # We override the all_clear?() method to always return true
+  def all_clear?(location, goal, board)
+    true
+  end
+
+  def valid_move?(location, goal)
+    # The knight moves in an L-shape: two spaces in a cardinal direction,
+    # Then one space in the perpendicular direction.
+    valid_spaces = []
+    # Y-Axis
+    [-2, 2].each do |y|
+      [-1, 1].each do |x|
+        valid_spaces.append([location[0] + y, location[1] + x])
+      end
+    end
+
+    # X-Axis
+    [-2, 2].each do |x|
+      [-1, 1].each do |y|
+        valid_spaces.append([location[0] + y, location[1] + x])
+      end
+    end
+
+    valid_spaces.include? goal
   end
 end
