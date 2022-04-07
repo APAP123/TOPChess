@@ -34,13 +34,14 @@ class Piece
     y_counter = counter(location[0], goal[0])
     x_counter = counter(location[1], goal[1])
 
-    current_y = location[0] + y_counter
-    current_x = location[1] + x_counter
+    current = Array.new(2)
+    current[0] = location[0] + y_counter
+    current[1] = location[1] + x_counter
     until current == goal
-      return false if board[current_y][current_x] != ' '
+      return false if board[current[0]][current[1]] != ' '
 
-      current_y += y_counter
-      current_x += x_counter
+      current[0] += y_counter
+      current[1] += x_counter
     end
 
     true
@@ -48,9 +49,9 @@ class Piece
 
   # Returns the Piece's unicode representation
   def draw_me
-    ' '
+    '?'
   end
-end/
+end
 
 # Class representation of the Pawn piece
 class Pawn < Piece

@@ -23,7 +23,7 @@ class Parser
 
   # Returns true if the entered string matches
   # long algorithmic notation format
-  def valid_format?(string)
+  def self.valid_format?(string)
     if string.match(/[a-h][1-8][a-h][1-8]/).nil?
       puts 'Incorrect formatting! Directions must be in'
       puts '[letter][number][letter][number] format.'
@@ -36,12 +36,12 @@ class Parser
 
   # Takes coordinates of desired piece and desired location
   # in long notation and returns them in array-coordinate formatting
-  def alg_to_array(string)
+  def self.alg_to_array(string)
     # Since we know the length will always be four, we can access
     # the individual characters directly rather than needing to
     # iterate through the string.
-    location = [NOTATION_LOOKUP[string[0]], NOTATION_LOOKUP[string[1]]]
-    goal = [NOTATION_LOOKUP[string[2]], NOTATION_LOOKUP[string[3]]]
+    location = [NOTATION_LOOKUP[string[1]], NOTATION_LOOKUP[string[0]]]
+    goal = [NOTATION_LOOKUP[string[3]], NOTATION_LOOKUP[string[2]]]
 
     [location, goal]
   end
