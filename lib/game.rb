@@ -49,27 +49,30 @@ class Chess
     return false if rook.has_moved && king.has_moved
     return false unless king.all_clear?(king_loc, rook_loc, @board)
 
+    # TODO: Still need to check each space between the King and it's
+    # destination to ensure he is not at risk of check in any of them
+
     true
   end
 
-  # Castling
+  # If can_castle?, performs a castling move and returns true
   def castling(string)
     # First check if Rook and King are in position
-    if string == 'O-O' && @player == -1 # Queenside castle, black's side
-      return can_castle?([0, 0], [0, 4])
+    player == 1 ? row = 7 : row = 0
+    string == 'O-O' ? rook_x = 0 : rook_x = 7
+
+    unless can_castle?([row, rook_x], [row, 4])
+      puts "You can't castle right now!"
+      return false
     end
 
-    if string == 'O-O-O' && @player == -1 # Kingside castle, black's side
-      return can_castle?([0, 7], [0, 4])
-    end
-
-    if string == 'O-O' && @player == 1 # Queenside castle, white's side
-      return can_castle?([7, 0], [7, 4])
-    end
-
-    if string == 'O-O-O' && @player == 1 # Kingside castle, white's side
-      return can_castle?([7, 7], [7, 4])
-    end
+    direction = @board[row][4].counter(4, rook_x)
+    @board[row][4 + (direction * 2)] = @board[row][4]
+    @board[row][4 + direction] = @board[row][rook_x]
+    # Need to clear spaces the pieces just left
+    @board[row][4] = nil
+    @board[row][rook_x] = nil
+    true
   end
 
   # Represents one player's turn in a match.
@@ -78,9 +81,14 @@ class Chess
     puts "#{color} player, please enter your move."
     loop do
       input = gets.chomp
-      until Parser.valid_format?(input)
-        input = gets.chomp
+
+      # Castling check
+      if input == 'O-O' || input == 'O-O-O'
+        break if castling(input)
       end
+
+      next unless Parser.valid_format?(input)
+
       coordinate_pair = Parser.alg_to_array(input)
       location = coordinate_pair[0]
       goal = coordinate_pair[1]
