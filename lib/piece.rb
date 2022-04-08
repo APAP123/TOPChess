@@ -81,10 +81,15 @@ end
 
 # Class representation of the Rook piece
 class Rook < Piece
+  attr_reader :has_moved
+  @has_moved = false # Needed for castling
   def valid_move?(location, goal)
     # check if goal is straight line (i.e. one of the axii must remain the same)
     # Then need to make sure no pieces are between it and goal
-    return true if location[0] == goal[0] || location[1] == goal[1]
+    if location[0] == goal[0] || location[1] == goal[1]
+      @has_moved = true
+      return true
+    end
 
     false
   end
@@ -101,7 +106,6 @@ class Bishop < Piece
     # For a Bishop's move to be valid, both axii must change from location to goal
     # In addition, the factor of change must be equal for the two axii
     # i.e., both axii should change by the same absolute value
-    # return true if location[0] != goal[0] && location[1] != goal[1] # this is probably redundant
     return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
 
     false
@@ -132,7 +136,7 @@ end
 # Class representation of the Knight piece
 class Knight < Piece
   # Since the Knight can hop over pieces,
-  # We override the all_clear?() method to always return true
+  # We override all_clear?() to always return true
   def all_clear?(location, goal, board)
     true
   end
@@ -166,12 +170,15 @@ end
 
 # Class representation of the King piece
 class King < Piece
+  attr_reader :has_moved
+  @has_moved = false # Needed to for castling
   def valid_move?(location, goal)
     # Same as Queen, but can only move one space in any direction.
     y_factor = (location[0] - goal[0]).abs
     x_factor = (location[1] - goal[1]).abs
-    eturn false if y_factor > 1 || x_factor > 1
+    return false if y_factor > 1 || x_factor > 1
 
+    @has_moved = true
     true
   end
 

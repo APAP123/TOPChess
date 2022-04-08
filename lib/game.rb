@@ -40,13 +40,47 @@ class Chess
     @board[location[0]][location[1]] = nil
   end
 
+  # Checks if the current player can castle or not
+  def can_castle?(rook_loc, king_loc)
+    rook = @board[rook_loc[0]][rook_loc[1]]
+    king = @board[king_loc[0]][king_loc[1]]
+
+    return false unless (rook.is_a? Rook) && (king.is_a? King)
+    return false if rook.has_moved && king.has_moved
+    return false unless king.all_clear?(king_loc, rook_loc, @board)
+
+    true
+  end
+
+  # Castling
+  def castling(string)
+    # First check if Rook and King are in position
+    if string == 'O-O' && @player == -1 # Queenside castle, black's side
+      return can_castle?([0, 0], [0, 4])
+    end
+
+    if string == 'O-O-O' && @player == -1 # Kingside castle, black's side
+      return can_castle?([0, 7], [0, 4])
+    end
+
+    if string == 'O-O' && @player == 1 # Queenside castle, white's side
+      return can_castle?([7, 0], [7, 4])
+    end
+
+    if string == 'O-O-O' && @player == 1 # Kingside castle, white's side
+      return can_castle?([7, 7], [7, 4])
+    end
+  end
+
   # Represents one player's turn in a match.
   def take_turn
     @player == 1 ? color = 'white' : color = 'black'
     puts "#{color} player, please enter your move."
     loop do
       input = gets.chomp
-      input = gets.chomp until Parser.valid_format?(input)
+      until Parser.valid_format?(input)
+        input = gets.chomp
+      end
       coordinate_pair = Parser.alg_to_array(input)
       location = coordinate_pair[0]
       goal = coordinate_pair[1]
