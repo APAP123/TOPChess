@@ -23,7 +23,7 @@ class Parser
 
   # Returns true if the entered string matches
   # long algorithmic notation format
-  def self.valid_format?(string)
+  def self.standard_format?(string)
     if string.match(/[a-h][1-8][a-h][1-8]/).nil?
       puts 'Incorrect formatting! Directions must be in'
       puts '[letter][number][letter][number] format.'
@@ -32,6 +32,23 @@ class Parser
     end
 
     true
+  end
+
+  # Returns true if string matches castling format
+  def self.castling_format?(string)
+    return true if string == 'O-O' # kingside
+    return true if string == 'O-O-O' # queenside
+
+    false
+  end
+
+  # Returns opcodes determined by the user's input
+  def self.read_input(string)
+    return 1 if standard_format?(string)
+    return 2 if castling_format?(string)
+    return 3 if string == 'save' # Saves the game
+
+    -1
   end
 
   # Takes coordinates of desired piece and desired location
