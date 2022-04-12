@@ -29,9 +29,20 @@ class Chess
     true
   end
 
-  # Checks if any player's King is currently in check.
+  # Checks if current player's King is currently in check.
   def check?
     # todo
+    opponent = @player * -1
+    # Iterate through the board looking for pieces of the opposite color
+    (0..@board.length - 1).each do |y|
+      (0..y.length - 1).each do |x|
+        if !@board[y][x].nil? && @board[y][x].color == opponent
+          # Check if opponent's piece is threatening King
+          return true if @board[y][x].threatening.is_a? King
+        end
+      end
+    end
+    false
   end
 
   # Moves the piece on location to goal
@@ -44,13 +55,16 @@ class Chess
   def can_castle?(rook_loc, king_loc)
     rook = @board[rook_loc[0]][rook_loc[1]]
     king = @board[king_loc[0]][king_loc[1]]
+    side = (rook_loc[1] - king_loc[1]) <=> 0 # Negative is queenside, positive king
 
     return false unless (rook.is_a? Rook) && (king.is_a? King)
-    return false if rook.has_moved && king.has_moved
+    return false if rook.has_moved || king.has_moved
     return false unless king.all_clear?(king_loc, rook_loc, @board)
+    return false if check?(board)
 
-    # TODO: Still need to check each space between the King and it's
-    # destination to ensure he is not at risk of check in any of them
+    simulated_board = self
+    simulated_board.move_piece(king_loc, [king_loc[0], king_loc[1] + side])
+    return false if simulated_board.check?
 
     true
   end
@@ -83,6 +97,8 @@ class Chess
       input = gets.chomp
 
       # Castling check
+      # TODO: scrap this and have Parser return integers instead
+      # to represent the response instead of a simple true or false
       if input == 'O-O' || input == 'O-O-O'
         break if castling(input)
       end

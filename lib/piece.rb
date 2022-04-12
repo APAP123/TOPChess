@@ -38,13 +38,36 @@ class Piece
     current[0] = location[0] + y_counter
     current[1] = location[1] + x_counter
     until current == goal
-      return false if board[current[0]][current[1]] != ' '
+      return false unless board[current[0]][current[1]].nil?
 
       current[0] += y_counter
       current[1] += x_counter
     end
 
     true
+  end
+
+  # Returns a piece of the opposite color that the calling Piece is threatening;
+  # Returns nil if no enemy piece is being threatened
+  def threatening(location, goal, board)
+    # Because of the way the 2D array is constructed, Y comes before X
+    y_counter = counter(location[0], goal[0])
+    x_counter = counter(location[1], goal[1])
+
+    y = location[0] + y_counter
+    x = location[1] + x_counter
+    until [y, x] == goal
+      unless board[y][x].nil?
+        return board[y][x] if board[y][x].color == @color * -1
+
+        return nil
+      end
+
+      y += y_counter
+      x += x_counter
+    end
+
+    nil
   end
 
   # Returns the Piece's unicode representation
