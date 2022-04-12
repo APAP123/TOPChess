@@ -6,6 +6,11 @@ require './lib/parser'
 class Chess
   attr_reader :board
 
+  # Simple lookup for getting player colors in string form
+  COLOR = {
+    -1 => 'Black',
+  }.freeze
+
   def initialize(board)
     @board = board
     @player = 1 # Current player; 1 is white, -1 is black
@@ -29,6 +34,14 @@ class Chess
     true
   end
 
+  # Returns true if a move made would put the current player's King in check
+  def simulated_check?(location, goal)
+    # Slow and dirty "deep cloning" trick
+    simulated_board = Chess.new(Marshal.load(Marshal.dump(@board)))
+    smulated_board.move_piece(location, goal)
+    simulated_board.check?
+  end
+
   # Checks if current player's King is currently in check.
   def check?
     # todo
@@ -42,6 +55,38 @@ class Chess
         end
       end
     end
+    false
+  end
+
+  # Returns true if every move a piece can make leaves the king in check
+  def all_simulated_checks?(location)
+    (0..7).each do |y| # Iterate through every space on the board
+      (0..7).each do |x|
+        # Check if the space is a valid one to move the piece to
+        if @board[location[0]][location[1]].valid_move?(location, [y, x])
+          # If moving the piece results in the king not being in check, return false
+          return false unless simulated_check?(location, [y, x])
+        end
+      end
+    end
+    true
+  end
+
+  # Returns true if any move made by the player would result in a check
+  def stalemate?
+    (0..@board.length - 1).each do |y|
+      (0..y.length - 1).each do |x|
+        if !@board[y][x].nil? && @board[y][x].color == @player
+          return false unless all_simulated_checks?(location)
+        end
+      end
+    end
+  end
+
+  # Returns true if all legal moves this turn would leave the player in check
+  def checkmate?
+    return true if check? && stalemate?
+
     false
   end
 
@@ -61,10 +106,7 @@ class Chess
     return false if rook.has_moved || king.has_moved
     return false unless king.all_clear?(king_loc, rook_loc, @board)
     return false if check?(board)
-
-    simulated_board = self
-    simulated_board.move_piece(king_loc, [king_loc[0], king_loc[1] + side])
-    return false if simulated_board.check?
+    return false if simulated_check?(king_loc, [king_loc[0], king_loc[1] + side])
 
     true
   end
@@ -89,36 +131,53 @@ class Chess
     true
   end
 
+  # Returns true if the desired turn passes a whole bunch of checks.
+  def valid_turn?(location, goal)
+    unless valid_piece?(location)
+      puts "You don't have a piece there!"
+      return false
+    end
+
+    unless @board[location[0]][location[1]].valid_move?(location, goal)
+      puts "This piece can't move there!"
+      return false
+    end
+
+    unless @board[location[0]][location[1]].all_clear?(location, goal, @board)
+      puts "There's other pieces in the way!"
+      return false
+    end
+
+    if simulated_check?(location, goal)
+      puts "You can't put yourself in check!"
+      return false
+    end
+
+    true
+  end
+
   # Represents one player's turn in a match.
   def take_turn
-    @player == 1 ? color = 'white' : color = 'black'
-    puts "#{color} player, please enter your move."
+    puts "#{COLOR[@player]} player, please enter your move."
     loop do
       input = gets.chomp
 
-      # Castling check
-      # TODO: scrap this and have Parser return integers instead
-      # to represent the response instead of a simple true or false
-      if input == 'O-O' || input == 'O-O-O'
+      case Parser.read_input(input)
+      when 1
+        # standard format; continue with loop
+      when 2
         break if castling(input)
+      when 3
+        # TODO: save game
+        next
+      else
+        next
       end
-
-      next unless Parser.valid_format?(input)
 
       coordinate_pair = Parser.alg_to_array(input)
       location = coordinate_pair[0]
       goal = coordinate_pair[1]
-      next unless valid_piece?(location)
-
-      unless @board[location[0]][location[1]].valid_move?(location, goal)
-        puts "This piece can't move there!"
-        next
-      end
-
-      unless @board[location[0]][location[1]].all_clear?(location, goal, @board)
-        puts "There's other pieces in the way!"
-        next
-      end
+      next unless valid_turn?(location, goal)
 
       move_piece(location, goal)
       break

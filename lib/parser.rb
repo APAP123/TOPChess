@@ -24,12 +24,7 @@ class Parser
   # Returns true if the entered string matches
   # long algorithmic notation format
   def self.standard_format?(string)
-    if string.match(/[a-h][1-8][a-h][1-8]/).nil?
-      puts 'Incorrect formatting! Directions must be in'
-      puts '[letter][number][letter][number] format.'
-      puts 'For example: g1f3'
-      return false
-    end
+    return false if string.match(/[a-h][1-8][a-h][1-8]/).nil?
 
     true
   end
