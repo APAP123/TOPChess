@@ -11,9 +11,22 @@ class Chess
     -1 => 'Black',
   }.freeze
 
-  def initialize(board)
+  def initialize(board, player = 1)
     @board = board
-    @player = 1 # Current player; 1 is white, -1 is black
+    @player = player # Current player; 1 is white, -1 is black1
+  end
+
+  # Returns a deep copy of the Chess object.
+  def clone
+    dummy_board = Array.new(8) { Array.new(8) }
+
+    (0..@board.length-1).each do |y|
+      (0..@board.length-1).each do |x|
+        dummy_board[y][x] = @board[y][x].clone
+      end
+    end
+
+    new(dummy_board, @player)
   end
 
   # Returns true if the passed location on the board contains
@@ -37,9 +50,9 @@ class Chess
   # Returns true if a move made would put the current player's King in check
   def simulated_check?(location, goal)
     # Slow and dirty "deep cloning" trick
-    simulated_board = Chess.new(Marshal.load(Marshal.dump(@board)))
-    smulated_board.move_piece(location, goal)
-    simulated_board.check?
+    simulated_game = clone
+    smulated_game.move_piece(location, goal)
+    simulated_game.check?
   end
 
   # Checks if current player's King is currently in check.
