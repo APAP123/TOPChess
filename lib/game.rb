@@ -6,6 +6,9 @@ require './lib/parser'
 class Chess
   attr_reader :board
 
+  @en_passant = false # If true, en passant maneuver occurs
+  @last_moved_piece = nil
+
   # Simple lookup for getting player colors in string form
   COLOR = {
     -1 => 'Black',
@@ -107,13 +110,20 @@ class Chess
   def move_piece(location, goal)
     @board[goal[0]][goal[1]] = @board[location[0]][location[1]]
     @board[location[0]][location[1]] = nil
+    
+    if @en_passant
+      @board[@last_moved_piece[0]][@last_moved_piece[1]] = nil
+      @en_passant = false
+    end
+
+    @last_moved_piece = goal
   end
 
   # Checks if the current player can castle or not
   def can_castle?(rook_loc, king_loc)
     rook = @board[rook_loc[0]][rook_loc[1]]
     king = @board[king_loc[0]][king_loc[1]]
-    side = (rook_loc[1] - king_loc[1]) <=> 0 # Negative is queenside, positive king
+    side = (rook_loc[1] - king_loc[1]) <=> 0 # Negative queenside, positive king
 
     return false unless (rook.is_a? Rook) && (king.is_a? King)
     return false if rook.has_moved || king.has_moved
@@ -144,19 +154,40 @@ class Chess
     true
   end
 
+  # Returns true if en passant is available
+  def en_passant?(location, goal)
+    # TODO
+    if goal[0] == location[0] - player && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
+      if @board[location[0]][location[1] - 1] == @last_moved_piece || @board[location[0]][location[1] + 1] == @last_moved_piece
+        puts 'en passant!'
+        @en_passant = true
+        return true
+      end
+    end
+    false
+  end
+
   # Returns true if the desired turn passes a whole bunch of checks.
   def valid_turn?(location, goal)
-    unless valid_piece?(location)
+    # Do checks with dummy board to prevent values changing on real one
+    sim_game = clone
+
+    if (@board[location[0]][location[1]].is_a? Pawn) && (en_passant?(location, goal))
+      @en_passant = true
+      return true
+    end
+
+    unless sim_game.valid_piece?(location)
       puts "You don't have a piece there!"
       return false
     end
 
-    unless @board[location[0]][location[1]].valid_move?(location, goal)
+    unless sim_game.board[location[0]][location[1]].valid_move?(location, goal)
       puts "This piece can't move there!"
       return false
     end
 
-    unless @board[location[0]][location[1]].all_clear?(location, goal, @board)
+    unless sim_game.board[location[0]][location[1]].all_clear?(location, goal, sim_game.board)
       puts "There's other pieces in the way!"
       return false
     end

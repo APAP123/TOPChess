@@ -78,21 +78,46 @@ end
 
 # Class representation of the Pawn piece
 class Pawn < Piece
+  attr_reader :moved_two, :move_count
+
   @has_moved = false
+  @moved_two = false
+  @move_count = 0 # To do an en passant capture, pawn must have moved exactly 3
+
+  # Returns true if the Pawn can capture an opponent at goal
+  def can_capture?(location, goal, board)
+    if goal[0] == location[0] - color && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
+      return true if !board[goal[0]][goal[1]].nil? && board[goal[0]][goal[1]].color == color * -1
+    end
+    false
+  end
+
   # Returns true if the passed movement is valid
-  def valid_move?(location, goal)
+  def valid_move?(location, goal, board = nil)
     # one space in front;
     # if first time pawn is moving, can optionally move two spaces in front
     # Don't forget en passant
     if goal[0] == location[0] - (1 * color)
       @has_moved = true
+      @move_count += 1
       return true
     end
 
     if !@has_moved && goal[0] == location[0] - (2 * color)
       @has_moved = true
+      @moved_two = true
+      @move_count += 2
       return true
     end
+
+    # Standard capture
+    if can_capture?(location, goal, board)
+      @has_moved = true
+      @moved_two = true
+      @move_count += 1
+      return true
+    end
+
     false
   end
 
