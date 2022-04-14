@@ -53,7 +53,6 @@ class Chess
 
   # Returns true if a move made would put the current player's King in check
   def simulated_check?(location, goal)
-    # Slow and dirty "deep cloning" trick
     simulated_game = clone
     simulated_game.move_piece(location, goal)
     simulated_game.check?
@@ -139,10 +138,15 @@ class Chess
     king = @board[king_loc[0]][king_loc[1]]
     side = (rook_loc[1] - king_loc[1]) <=> 0 # Negative queenside, positive king
 
+    puts "position check..."
     return false unless (rook.is_a? Rook) && (king.is_a? King)
+    puts "Movement check..."
     return false if rook.has_moved || king.has_moved
+    puts "Clear check..."
     return false unless king.all_clear?(king_loc, rook_loc, @board)
+    puts "Check check..."
     return false if check?(board)
+    puts "Simulated check..."
     return false if simulated_check?(king_loc, [king_loc[0], king_loc[1] + side])
 
     true
@@ -151,7 +155,7 @@ class Chess
   # If can_castle?, performs a castling move and returns true
   def castling(string)
     # First check if Rook and King are in position
-    player == 1 ? row = 7 : row = 0
+    @player == 1 ? row = 7 : row = 0
     string == 'O-O' ? rook_x = 0 : rook_x = 7
 
     unless can_castle?([row, rook_x], [row, 4])
@@ -172,7 +176,7 @@ class Chess
   def en_passant?(location, goal)
     # If the goal is located in front and to the left or right of the moving pawn
     if goal[0] == location[0] - @player && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
-      if @board[location[0]][location[1] - 1] == @last_moved_piece || @board[location[0]][location[1] + 1] == @last_moved_piece
+      if [location[0], location[1] - 1] == @last_moved_piece || [location[0], location[1] + 1] == @last_moved_piece 
         puts 'en passant!'
         @en_passant = true
         return true
@@ -183,31 +187,23 @@ class Chess
 
   # Returns true if the desired turn passes a whole bunch of checks.
   def valid_turn?(location, goal)
-    # Do checks with dummy board to prevent values changing on real one
-    sim_game = clone
-
-    if (@board[location[0]][location[1]].is_a? Pawn) && (en_passant?(location, goal))
+    if (@board[location[0]][location[1]].is_a? Pawn) && en_passant?(location, goal)
       @en_passant = true
       return true
     end
 
-    unless sim_game.valid_piece?(location)
+    unless valid_piece?(location)
       puts "You don't have a piece there!"
-      return false
-    end
-
-    unless sim_game.board[location[0]][location[1]].valid_move?(location, goal, sim_game.board)
-      puts "This piece can't move there!"
-      return false
-    end
-
-    unless sim_game.board[location[0]][location[1]].all_clear?(location, goal, sim_game.board)
-      puts "There's other pieces in the way!"
       return false
     end
 
     if simulated_check?(location, goal)
       puts "You can't put yourself in check!"
+      return false
+    end
+
+    unless board[location[0]][location[1]].valid_move?(location, goal, board)
+      puts "This piece can't move there!"
       return false
     end
 
@@ -224,7 +220,7 @@ class Chess
       when 1
         # standard format; continue with loop
       when 2
-        break if castling(input)
+        castling(input) ? break : next
       when 3
         # TODO: save game
         next
@@ -253,20 +249,23 @@ class Chess
 
   # Draws board out to screen
   def draw_board
+    puts '  a b c d e f g h'
     (0..board.length - 1).each do |y|
+      print "#{Parser.y_lookup(y)}|"
       (0..board[y].length - 1).each do |x|
         if board[y][x].nil?
           if (y.even? && x.even?) || (y.odd? && x.odd?)
-            print '■'
+            print '■ '
           else
-            print '□'
+            print '□ '
           end
           next
         end
-        print board[y][x].draw_me
+        print "#{board[y][x].draw_me} "
       end
-      puts "\n"
+      puts "|#{Parser.y_lookup(y)}\n"
     end
+    puts '  a b c d e f g h'
   end
 end
 
