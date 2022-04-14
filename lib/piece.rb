@@ -5,6 +5,7 @@ class Piece
   def initialize(color)
     # todo
     @color = color # 1 for white, -1 for black
+    @has_moved = false
   end
 
   # Returns true if goal is within board boundary
@@ -37,10 +38,10 @@ class Piece
     current = Array.new(2)
     current[0] = location[0] + y_counter
     current[1] = location[1] + x_counter
-    puts "Location: #{location}  Goal: #{goal}"
+    # puts "Location: #{location}  Goal: #{goal}"
     until current == goal
       # puts "#{draw_me}'s board is #{board}"
-      puts "\n current is #{current}\n"
+      # puts "\n current is #{current}\n"
       return false unless board[current[0]][current[1]].nil?
 
       current[0] += y_counter
@@ -92,9 +93,12 @@ end
 class Pawn < Piece
   attr_reader :moved_two, :move_count
 
-  @has_moved = false
-  @moved_two = false
-  @move_count = 0 # To do an en passant capture, pawn must have moved exactly 3
+  def initialize(color)
+    @color = color # 1 for white, -1 for black
+    @has_moved = false
+    @moved_two = false
+    @move_count = 0 # To do an en passant capture, pawn must have moved exactly 3
+  end
 
   # Returns true if the Pawn can capture an opponent at goal
   def can_capture?(location, goal, board)
@@ -108,19 +112,22 @@ class Pawn < Piece
   def valid_goal?(location, goal, board)
     @move_count = 0 if @move_count.nil?
 
+    # puts "@has_moved: [#{@has_moved}]  @moved_two: [#{@moved_two}]  @move_count: [#{@move_count}]"
     # one space in front;
     # if first time pawn is moving, can optionally move two spaces in front
     # Don't forget en passant
 
     # Moving straight ahead, no capture
-    if goal[0] == location[0] - (1 * color) && goal[1] == location[1]
+    if goal[0] == location[0] - (1 * color) && goal[1] == location[1] &&
+       board[goal[0]][goal[1]].nil?
       @has_moved = true
-      puts "move_count is [ #{@move_count} ]"
+      # puts "move_count is [ #{@move_count} ]"
       @move_count += 1
       return true
     end
 
-    if !@has_moved && goal[0] == location[0] - (2 * color) && goal[1] == location[1]
+    if !@has_moved && goal[0] == location[0] - (2 * color) && goal[1] == location[1] &&
+       board[goal[0]][goal[1]].nil?
       @has_moved = true
       @moved_two = true
       @move_count += 2
@@ -147,7 +154,6 @@ end
 # Class representation of the Rook piece
 class Rook < Piece
   attr_reader :has_moved
-  @has_moved = false # Needed for castling
 
   def valid_goal?(location, goal, board)
     # check if goal is straight line (i.e. one of the axii must remain the same)
@@ -241,7 +247,6 @@ end
 # Class representation of the King piece
 class King < Piece
   attr_reader :has_moved
-  @has_moved = false # Needed to for castling
   def valid_goal?(location, goal, board)
     # Same as Queen, but can only move one space in any direction.
     y_factor = (location[0] - goal[0]).abs
