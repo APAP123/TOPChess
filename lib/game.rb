@@ -12,6 +12,7 @@ class Chess
   # Simple lookup for getting player colors in string form
   COLOR = {
     -1 => 'Black',
+    1 => 'White'
   }.freeze
 
   def initialize(board, player = 1)
@@ -29,7 +30,7 @@ class Chess
       end
     end
 
-    new(dummy_board, @player)
+    Chess.new(dummy_board, @player)
   end
 
   # Returns true if the passed location on the board contains
@@ -54,20 +55,33 @@ class Chess
   def simulated_check?(location, goal)
     # Slow and dirty "deep cloning" trick
     simulated_game = clone
-    smulated_game.move_piece(location, goal)
+    simulated_game.move_piece(location, goal)
     simulated_game.check?
+  end
+
+  # Returns location of current player's King in [y, x] coordinates
+  def find_king
+    (0..7).each do |y|
+      (0..7).each do |x|
+        if (@board[y][x].is_a? King) && @board[y][x].color == @player
+          return [y, x]
+        end
+      end
+    end
+    puts 'Either your King is gone or this method broke.'
   end
 
   # Checks if current player's King is currently in check.
   def check?
     # todo
+    king = find_king
     opponent = @player * -1
     # Iterate through the board looking for pieces of the opposite color
-    (0..@board.length - 1).each do |y|
-      (0..y.length - 1).each do |x|
+    (0..7).each do |y|
+      (0..7).each do |x|
         if !@board[y][x].nil? && @board[y][x].color == opponent
           # Check if opponent's piece is threatening King
-          return true if @board[y][x].threatening.is_a? King
+          return true if @board[y][x].valid_move?([y, x], king, @board)
         end
       end
     end
@@ -79,7 +93,7 @@ class Chess
     (0..7).each do |y| # Iterate through every space on the board
       (0..7).each do |x|
         # Check if the space is a valid one to move the piece to
-        if @board[location[0]][location[1]].valid_move?(location, [y, x])
+        if @board[location[0]][location[1]].valid_move?(location, [y, x], @board)
           # If moving the piece results in the king not being in check, return false
           return false unless simulated_check?(location, [y, x])
         end
@@ -110,7 +124,7 @@ class Chess
   def move_piece(location, goal)
     @board[goal[0]][goal[1]] = @board[location[0]][location[1]]
     @board[location[0]][location[1]] = nil
-    
+
     if @en_passant
       @board[@last_moved_piece[0]][@last_moved_piece[1]] = nil
       @en_passant = false
@@ -156,8 +170,8 @@ class Chess
 
   # Returns true if en passant is available
   def en_passant?(location, goal)
-    # TODO
-    if goal[0] == location[0] - player && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
+    # If the goal is located in front and to the left or right of the moving pawn
+    if goal[0] == location[0] - @player && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
       if @board[location[0]][location[1] - 1] == @last_moved_piece || @board[location[0]][location[1] + 1] == @last_moved_piece
         puts 'en passant!'
         @en_passant = true
@@ -182,7 +196,7 @@ class Chess
       return false
     end
 
-    unless sim_game.board[location[0]][location[1]].valid_move?(location, goal)
+    unless sim_game.board[location[0]][location[1]].valid_move?(location, goal, sim_game.board)
       puts "This piece can't move there!"
       return false
     end
