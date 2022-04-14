@@ -37,11 +37,18 @@ class Piece
     current = Array.new(2)
     current[0] = location[0] + y_counter
     current[1] = location[1] + x_counter
+    puts "Location: #{location}  Goal: #{goal}"
     until current == goal
+      # puts "#{draw_me}'s board is #{board}"
+      puts "\n current is #{current}\n"
       return false unless board[current[0]][current[1]].nil?
 
       current[0] += y_counter
       current[1] += x_counter
+    end
+
+    unless board[current[0]][current[1]].nil? || board[current[0]][current[1]].color == @color * -1
+      return false
     end
 
     true
@@ -70,6 +77,11 @@ class Piece
     nil
   end
 
+  # Returns true if the piece can move to the goal
+  def valid_move?(location, goal, board)
+    valid_goal?(location, goal, board) && all_clear?(location, goal, board)
+  end
+
   # Returns the Piece's unicode representation
   def draw_me
     '?'
@@ -93,17 +105,22 @@ class Pawn < Piece
   end
 
   # Returns true if the passed movement is valid
-  def valid_move?(location, goal, board = nil)
+  def valid_goal?(location, goal, board)
+    @move_count = 0 if @move_count.nil?
+
     # one space in front;
     # if first time pawn is moving, can optionally move two spaces in front
     # Don't forget en passant
-    if goal[0] == location[0] - (1 * color)
+
+    # Moving straight ahead, no capture
+    if goal[0] == location[0] - (1 * color) && goal[1] == location[1]
       @has_moved = true
+      puts "move_count is [ #{@move_count} ]"
       @move_count += 1
       return true
     end
 
-    if !@has_moved && goal[0] == location[0] - (2 * color)
+    if !@has_moved && goal[0] == location[0] - (2 * color) && goal[1] == location[1]
       @has_moved = true
       @moved_two = true
       @move_count += 2
@@ -131,7 +148,8 @@ end
 class Rook < Piece
   attr_reader :has_moved
   @has_moved = false # Needed for castling
-  def valid_move?(location, goal)
+
+  def valid_goal?(location, goal, board)
     # check if goal is straight line (i.e. one of the axii must remain the same)
     # Then need to make sure no pieces are between it and goal
     if location[0] == goal[0] || location[1] == goal[1]
@@ -150,7 +168,7 @@ end
 
 # Class representation of the Bishop piece
 class Bishop < Piece
-  def valid_move?(location, goal)
+  def valid_goal?(location, goal, board)
     # For a Bishop's move to be valid, both axii must change from location to goal
     # In addition, the factor of change must be equal for the two axii
     # i.e., both axii should change by the same absolute value
@@ -167,7 +185,7 @@ end
 
 # Class representation of the Queen piece
 class Queen < Piece
-  def valid_move?(location, goal)
+  def valid_goal?(location, goal, board)
     # The Queen has the combined movement of the rook and bishop
     return true if location[0] == goal[0] || location[1] == goal[1]
     return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
@@ -184,12 +202,16 @@ end
 # Class representation of the Knight piece
 class Knight < Piece
   # Since the Knight can hop over pieces,
-  # We override all_clear?() to always return true
+  # We override all_clear?() to only check destination
   def all_clear?(location, goal, board)
+    unless board[goal[0]][goal[1]].nil? || board[goal[0]][goal[1]].color == @color * -1
+      return false
+    end
+
     true
   end
 
-  def valid_move?(location, goal)
+  def valid_goal?(location, goal, board)
     # The knight moves in an L-shape: two spaces in a cardinal direction,
     # Then one space in the perpendicular direction.
     valid_spaces = []
@@ -220,7 +242,7 @@ end
 class King < Piece
   attr_reader :has_moved
   @has_moved = false # Needed to for castling
-  def valid_move?(location, goal)
+  def valid_goal?(location, goal, board)
     # Same as Queen, but can only move one space in any direction.
     y_factor = (location[0] - goal[0]).abs
     x_factor = (location[1] - goal[1]).abs
