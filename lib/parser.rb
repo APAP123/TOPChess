@@ -21,6 +21,30 @@ class Parser
     '8' => 0
   }.freeze
 
+  # 'reverse' lookup table for y-axis to notation
+  Y_LOOKUP = {
+    0 => '8',
+    1 => '7',
+    2 => '6',
+    3 => '5',
+    4 => '4',
+    5 => '3',
+    6 => '2',
+    7 => '1'
+  }.freeze
+
+  # 'reverse' lookup table for x-axis to notation
+  X_LOOKUP = {
+    0 => 'a',
+    1 => 'b',
+    2 => 'c',
+    3 => 'd',
+    4 => 'e',
+    5 => 'f',
+    6 => 'g',
+    7 => 'h'
+  }.freeze
+
   # Returns true if the entered string matches
   # long algorithmic notation format
   def self.standard_format?(string)
@@ -56,5 +80,13 @@ class Parser
     goal = [NOTATION_LOOKUP[string[3]], NOTATION_LOOKUP[string[2]]]
 
     [location, goal]
+  end
+
+  def self.y_lookup(value)
+    Y_LOOKUP[value]
+  end
+
+  def self.x_lookup(value)
+    X_LOOKUP[value]
   end
 end
