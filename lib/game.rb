@@ -103,13 +103,14 @@ class Chess
 
   # Returns true if any move made by the player would result in a check
   def stalemate?
-    (0..@board.length - 1).each do |y|
-      (0..y.length - 1).each do |x|
+    (0..7).each do |y|
+      (0..7).each do |x|
         if !@board[y][x].nil? && @board[y][x].color == @player
-          return false unless all_simulated_checks?(location)
+          return false unless all_simulated_checks?([y, x])
         end
       end
     end
+    true
   end
 
   # Returns true if all legal moves this turn would leave the player in check
@@ -282,4 +283,4 @@ board = [
 
 chess = Chess.new(board)
 
-chess.play
+# chess.play
