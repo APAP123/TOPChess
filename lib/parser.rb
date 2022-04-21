@@ -65,7 +65,7 @@ class Parser
   def self.read_input(string)
     return 1 if standard_format?(string)
     return 2 if castling_format?(string)
-    return 3 if string == 'save' # Saves the game
+    return 3 if string.downcase == 'save' || string.downcase == 's' # Saves the game
 
     -1
   end
@@ -95,11 +95,11 @@ class Parser
   # Returns true if the chosen amount of players is valid
   def self.valid_players?(input)
     case input
-    when 0
+    when '0'
       true
-    when 1
+    when '1'
       true
-    when 2
+    when '2'
       true
     else
       false
