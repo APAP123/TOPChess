@@ -1,5 +1,5 @@
 # spec/game_spec.rb
-require './lib/game'
+require './lib/chess'
 require './lib/piece'
 require './lib/parser'
 

@@ -204,7 +204,7 @@ class Chess
   def en_passant?(location, goal)
     # If the goal is located in front and to the left or right of the moving pawn
     if goal[0] == location[0] - @player && (goal[1] == location[1] - 1 || goal[1] == location[1] + 1)
-      if [location[0], location[1] - 1] == @last_moved_piece || [location[0], location[1] + 1] == @last_moved_piece 
+      if [location[0], location[1] - 1] == @last_moved_piece || [location[0], location[1] + 1] == @last_moved_piece
         puts 'en passant!'
         @en_passant = true
         return true
