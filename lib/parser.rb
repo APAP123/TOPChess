@@ -82,11 +82,39 @@ class Parser
     [location, goal]
   end
 
+  # Returns chess notation Y-value from a given array value
   def self.y_lookup(value)
     Y_LOOKUP[value]
   end
 
+  # Returns chess notation X-value from a given array value
   def self.x_lookup(value)
     X_LOOKUP[value]
+  end
+
+  # Returns true if the chosen amount of players is valid
+  def self.valid_players?(input)
+    case input
+    when 0
+      true
+    when 1
+      true
+    when 2
+      true
+    else
+      false
+    end
+  end
+
+  # Returns true if passed 'L' or 'Load' (case-insensitive)
+  def self.load_game?(input)
+    case input.downcase
+    when 'l'
+      true
+    when 'load'
+      true
+    else
+      false
+    end
   end
 end
