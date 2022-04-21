@@ -15,7 +15,7 @@ class Chess
 
   def initialize(board, player = 1)
     @board = board
-    @player = player # Current player; 1 is white, -1 is black1
+    @player = player # Current player; 1 is white, -1 is black
     @en_passant = false # If true, en passant maneuver occurs
     @last_moved_piece = nil
   end
@@ -166,15 +166,14 @@ class Chess
     king = @board[king_loc[0]][king_loc[1]]
     side = (rook_loc[1] - king_loc[1]) <=> 0 # Negative queenside, positive king
 
-    puts "position check..."
     return false unless (rook.is_a? Rook) && (king.is_a? King)
-    puts "Movement check..."
+
     return false if rook.has_moved || king.has_moved
-    puts "Clear check..."
+
     return false unless king.all_clear?(king_loc, rook_loc, @board)
-    puts "Check check..."
+
     return false if check?(board)
-    puts "Simulated check..."
+
     return false if simulated_check?(king_loc, [king_loc[0], king_loc[1] + side])
 
     true
@@ -266,10 +265,14 @@ class Chess
     end
   end
 
-  # Main driver of the game; checks for win conditions and swaps players after each turn.
+  # Main driver of the game; checks for win conditions, swaps players after each turn.
   def play
     loop do
       draw_board
+      if checkmate?
+        puts "Checkmate! #{COLOR[@player * -1]} wins!"
+        return
+      end
       take_turn
       @player *= -1
     end
@@ -296,18 +299,3 @@ class Chess
     puts '  a b c d e f g h'
   end
 end
-
-board = [
-  [Rook.new(-1), Knight.new(-1), Bishop.new(-1), Queen.new(-1), King.new(-1), Bishop.new(-1), Knight.new(-1), Rook.new(-1)],
-  [Pawn.new(-1), Pawn.new(-1), Pawn.new(-1), Pawn.new(-1), Pawn.new(-1), Pawn.new(-1), Pawn.new(-1), Pawn.new(-1)],
-  [nil, nil, nil, nil, nil, nil, nil, nil],
-  [nil, nil, nil, nil, nil, nil, nil, nil],
-  [nil, nil, nil, nil, nil, nil, nil, nil],
-  [nil, nil, nil, nil, nil, nil, nil, nil],
-  [Pawn.new(1), Pawn.new(1), Pawn.new(1), Pawn.new(1), Pawn.new(1), Pawn.new(1), Pawn.new(1), Pawn.new(1)],
-  [Rook.new(1), Knight.new(1), Bishop.new(1), Queen.new(1), King.new(1), Bishop.new(1), Knight.new(1), Rook.new(1)]
-]
-
-chess = Chess.new(board)
-
-# chess.play

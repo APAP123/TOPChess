@@ -1,5 +1,4 @@
 # Base class for all game pieces to inherit from
-# Perhaps run inbound before valid_move?(); that would save a few rewrites.
 class Piece
   attr_reader :color
   def initialize(color)
@@ -38,10 +37,8 @@ class Piece
     current = Array.new(2)
     current[0] = location[0] + y_counter
     current[1] = location[1] + x_counter
-    # puts "Location: #{location}  Goal: #{goal}"
+
     until current == goal
-      # puts "#{draw_me}'s board is #{board}"
-      # puts "\n current is #{current}\n"
       return false unless board[current[0]][current[1]].nil?
 
       current[0] += y_counter
@@ -112,16 +109,13 @@ class Pawn < Piece
   def valid_goal?(location, goal, board)
     @move_count = 0 if @move_count.nil?
 
-    # puts "@has_moved: [#{@has_moved}]  @moved_two: [#{@moved_two}]  @move_count: [#{@move_count}]"
     # one space in front;
     # if first time pawn is moving, can optionally move two spaces in front
-    # Don't forget en passant
 
     # Moving straight ahead, no capture
     if goal[0] == location[0] - (1 * color) && goal[1] == location[1] &&
        board[goal[0]][goal[1]].nil?
       @has_moved = true
-      # puts "move_count is [ #{@move_count} ]"
       @move_count += 1
       return true
     end
