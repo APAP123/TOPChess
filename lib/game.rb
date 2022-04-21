@@ -1,13 +1,11 @@
 # Main driver of the game.
+require 'json'
 require './lib/piece'
 require './lib/parser'
 
 # Class representation of Chess
 class Chess
   attr_reader :board
-
-  @en_passant = false # If true, en passant maneuver occurs
-  @last_moved_piece = nil
 
   # Simple lookup for getting player colors in string form
   COLOR = {
@@ -18,6 +16,8 @@ class Chess
   def initialize(board, player = 1)
     @board = board
     @player = player # Current player; 1 is white, -1 is black1
+    @en_passant = false # If true, en passant maneuver occurs
+    @last_moved_piece = nil
   end
 
   # Returns a deep copy of the Chess object.
@@ -31,6 +31,33 @@ class Chess
     end
 
     Chess.new(dummy_board, @player)
+  end
+
+  # Dumps game into .json format
+  def dump_json
+    JSON.dump ({
+      board: @board,
+      player: @player,
+      en_passant: @en_passant,
+      last_moved_piece: @last_moved_piece
+    })
+  end
+
+  # Saves game as file in working directory
+  def save_game
+    puts 'Save game as?'
+    file = gets.chomp
+    File.open("#{file}.json", 'w') { |f| f.write (dump_json) }
+    puts "Game saved as #{file}.json"
+  end
+
+  # Loads games from JSON-formatted save
+  def load_game(string)
+    data = JSON.parse string
+    @board = data['board']
+    @player = data['player']
+    @en_passant = data['en_passant']
+    @last_moved_piece = data['last_moved_piece']
   end
 
   # Returns true if the passed location on the board contains
