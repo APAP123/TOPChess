@@ -35,12 +35,13 @@ def choose_players
       next
     end
     human_players = player_count
+    break
   end
 end
 
 if load_game?
   chess = Chess.new(nil)
-  chess.load_game(verify_file)
+  chess.load_game(File.read(verify_file))
 else
   choose_players
   board = [
