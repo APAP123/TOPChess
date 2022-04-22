@@ -33,10 +33,69 @@ class Chess
     Chess.new(dummy_board, @player)
   end
 
+  # prints values to screen for debugging
+  def debug_print
+    puts "Player: #{@player}"
+    puts "en_passant: #{@en_passant}"
+    puts "last_moved_piece: #{@last_moved_piece}"
+  end
+
+  # Dumps board to .json
+  def dump_board
+    dummy_board = Array.new(8) { Array.new(8) }
+    (0..7).each do |y|
+      (0..7).each do |x|
+        dummy_board[y][x] = @board[y][x].dump unless @board[y][x].nil?
+      end
+    end
+    dummy_board
+  end
+
+  def hash_board
+    dummy_board = Array.new(8) { Array.new(8) }
+    (0..7).each do |y|
+      (0..7).each do |x|
+        dummy_board[y][x] = @board[y][x].to_hash unless @board[y][x].nil?
+      end
+    end
+    dummy_board
+  end
+
+  # Generates Piece based off hash values
+  def generate_piece(data)
+    case data['value']
+    when 1
+      Pawn.new(data['color'], data['has_moved'], data['moved_two'], data['move_count'])
+    when 2
+      Knight.new(data['color'], data['has_moved'])
+    when 3
+      Bishop.new(data['color'], data['has_moved'])
+    when 5
+      Rook.new(data['color'], data['has_moved'])
+    when 9
+      Queen.new(data['color'], data['has_moved'])
+    when 100
+      King.new(data['color'], data['has_moved'])
+    end
+  end
+
+  # Loads board from .json file
+  def load_board(data)
+    puts "Input is #{data.to_json}"
+    dummy_board = Array.new(8) { Array.new(8) }
+    (0..7).each do |y|
+      (0..7).each do |x|
+        puts "data is #{data[y][x]}"
+        dummy_board[y][x] = generate_piece(data[y][x]) unless data[y][x].nil?
+      end
+    end
+    dummy_board
+  end
+
   # Dumps game into .json format
   def dump_json
-    JSON.dump ({
-      board: @board,
+    JSON.generate ({
+      board: hash_board,
       player: @player,
       en_passant: @en_passant,
       last_moved_piece: @last_moved_piece
@@ -47,17 +106,19 @@ class Chess
   def save_game
     puts 'Save game as?'
     file = gets.chomp
-    File.open("#{file}.json", 'w') { |f| f.write (dump_json) }
+    File.open("#{file}.json", 'w') { |f| f.write(dump_json) }
     puts "Game saved as #{file}.json"
   end
 
   # Loads games from JSON-formatted save
   def load_game(string)
-    data = JSON.parse string
-    @board = data['board']
+    data = JSON.parse(string)
+    @board = load_board(data['board'])
+    #@board = data['board']
     @player = data['player']
     @en_passant = data['en_passant']
     @last_moved_piece = data['last_moved_piece']
+    debug_print
   end
 
   # Returns true if the passed location on the board contains
@@ -249,7 +310,7 @@ class Chess
       when 2
         castling(input) ? break : next
       when 3
-        # TODO: save game
+        save_game
         next
       else
         next

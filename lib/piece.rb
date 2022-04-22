@@ -1,10 +1,45 @@
 # Base class for all game pieces to inherit from
+require 'json'
 class Piece
-  attr_reader :color
-  def initialize(color)
+  attr_reader :color, :value
+
+  # Returns value of Piece. Note this is NOT material value, but rather
+  # an internal value used for saving and loading pieces.
+  def value_lookup
+    return 1 if self.is_a? Pawn
+    return 2 if self.is_a? Knight
+    return 3 if self.is_a? Bishop
+    return 5 if self.is_a? Rook
+    return 9 if self.is_a? Queen
+    return 100 if self.is_a? King
+  end
+
+  def initialize(color, has_moved = false, value = value_lookup)
     # todo
     @color = color # 1 for white, -1 for black
-    @has_moved = false
+    @has_moved = has_moved
+    @value = value
+  end
+
+  # Dumps Piece to .json
+  def dump
+    JSON.dump ({
+      color: @color,
+      has_moved: @has_moved,
+      value: @value
+    })
+  end
+
+  def to_hash
+    {
+      color: @color,
+      has_moved: @has_moved,
+      value: @value
+    }
+  end
+
+  def to_json
+    to_hash.to_json
   end
 
   # Returns true if goal is within board boundary
@@ -90,11 +125,32 @@ end
 class Pawn < Piece
   attr_reader :moved_two, :move_count
 
-  def initialize(color)
+  def initialize(color, has_moved = false, moved_two = false, move_count = 0, value = value_lookup)
     @color = color # 1 for white, -1 for black
-    @has_moved = false
-    @moved_two = false
-    @move_count = 0 # To do an en passant capture, pawn must have moved exactly 3
+    @has_moved = has_moved
+    @moved_two = moved_two
+    @move_count = move_count # To do an en passant capture, pawn must have moved exactly 3
+    @value = value
+  end
+
+  # Dumps Pawn to .json
+  def dump
+    JSON.dump ({
+      color: @color,
+      has_moved: @has_moved,
+      moved_two: @moved_two,
+      move_count: @move_count
+    })
+  end
+
+  def to_hash
+    {
+      color: @color,
+      has_moved: @has_moved,
+      value: @value,
+      moved_two: @moved_two,
+      move_count: @move_count
+    }
   end
 
   # Returns true if the Pawn can capture an opponent at goal
