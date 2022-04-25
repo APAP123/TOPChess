@@ -77,6 +77,7 @@ end
       next unless chess.valid_turn?(location, goal)
 
       chess.move_piece(location, goal)
+      chess.promote(goal) if chess.can_promote?(goal)
       break
     end
   end

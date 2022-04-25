@@ -184,6 +184,37 @@ class Chess
     false
   end
 
+  # Checks if piece can be promoted
+  def can_promote?(location)
+    return false unless @board[location[0]][location[1]].is_a? Pawn
+    puts 'DEBUG: is a pawn!'
+    puts "DEBUG: Location is: #{location}"
+    if location[0] == 0 && @board[location[0]][location[1]].color == 1
+      true
+    elsif location[0] == 7 && @board[location[0]][location[1]].color == -1
+      true
+    else
+      false
+    end
+  end
+
+  # Prompts the player to promote their Pawn
+  def promote(location)
+    puts 'Promotion! What would you like to promote your pawn to?'
+    puts 'Please enter one of the following: Rook, Knight, Bishop, or Queen'
+    until (value = Parser.validate_piece(gets)) != -1
+      puts 'Invalid input!'
+    end
+
+    hash = {
+      'value' => value,
+      'color' => @player,
+      'has_moved' => true
+    }
+
+    @board[location[0]][location[1]] = generate_piece(hash)
+  end
+
   # Moves the piece on location to goal
   def move_piece(location, goal)
     @board[goal[0]][goal[1]] = @board[location[0]][location[1]]
@@ -257,7 +288,6 @@ class Chess
     end
 
     unless valid_piece?(location)
-      puts "You don't have a piece there!"
       return false
     end
 

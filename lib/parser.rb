@@ -82,6 +82,22 @@ class Parser
     [location, goal]
   end
 
+  # Returns number representing a Piece based on string entered
+  def self.validate_piece(input)
+    case input.chomp.downcase
+    when 'knight'
+      2
+    when 'bishop'
+      3
+    when 'rook'
+      5
+    when 'queen'
+      9
+    else
+      -1
+    end
+  end
+
   # Returns chess notation Y-value from a given array value
   def self.y_lookup(value)
     Y_LOOKUP[value]
