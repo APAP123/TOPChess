@@ -20,15 +20,7 @@ class Piece
     @value = value
   end
 
-  # Dumps Piece to .json
-  def dump
-    JSON.dump ({
-      color: @color,
-      has_moved: @has_moved,
-      value: @value
-    })
-  end
-
+  # Returns hash containing Piece's variables
   def to_hash
     {
       color: @color,
@@ -75,7 +67,8 @@ class Piece
       current[1] += x_counter
     end
 
-    unless board[current[0]][current[1]].nil? || board[current[0]][current[1]].color == @color * -1
+    unless board[current[0]][current[1]].nil? ||
+           board[current[0]][current[1]].color == @color * -1
       return false
     end
 
@@ -200,7 +193,7 @@ end
 class Rook < Piece
   attr_reader :has_moved
 
-  def valid_goal?(location, goal, board)
+  def valid_goal?(location, goal, _board)
     # check if goal is straight line (i.e. one of the axii must remain the same)
     # Then need to make sure no pieces are between it and goal
     if location[0] == goal[0] || location[1] == goal[1]
@@ -219,7 +212,7 @@ end
 
 # Class representation of the Bishop piece
 class Bishop < Piece
-  def valid_goal?(location, goal, board)
+  def valid_goal?(location, goal, _board)
     # For a Bishop's move to be valid, both axii must change from location to goal
     # In addition, the factor of change must be equal for the two axii
     # i.e., both axii should change by the same absolute value
@@ -236,7 +229,7 @@ end
 
 # Class representation of the Queen piece
 class Queen < Piece
-  def valid_goal?(location, goal, board)
+  def valid_goal?(location, goal, _board)
     # The Queen has the combined movement of the rook and bishop
     return true if location[0] == goal[0] || location[1] == goal[1]
     return true if (location[0] - goal[0]).abs == (location[1] - goal[1]).abs
@@ -254,15 +247,16 @@ end
 class Knight < Piece
   # Since the Knight can hop over pieces,
   # We override all_clear?() to only check destination
-  def all_clear?(location, goal, board)
-    unless board[goal[0]][goal[1]].nil? || board[goal[0]][goal[1]].color == @color * -1
+  def all_clear?(_location, goal, board)
+    unless board[goal[0]][goal[1]].nil? ||
+           board[goal[0]][goal[1]].color == @color * -1
       return false
     end
 
     true
   end
 
-  def valid_goal?(location, goal, board)
+  def valid_goal?(location, goal, _board)
     # The knight moves in an L-shape: two spaces in a cardinal direction,
     # Then one space in the perpendicular direction.
     valid_spaces = []
@@ -292,7 +286,7 @@ end
 # Class representation of the King piece
 class King < Piece
   attr_reader :has_moved
-  def valid_goal?(location, goal, board)
+  def valid_goal?(location, goal, _board)
     # Same as Queen, but can only move one space in any direction.
     y_factor = (location[0] - goal[0]).abs
     x_factor = (location[1] - goal[1]).abs

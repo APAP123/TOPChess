@@ -65,7 +65,7 @@ class Parser
   def self.read_input(string)
     return 1 if standard_format?(string)
     return 2 if castling_format?(string)
-    return 3 if string.downcase == 'save' || string.downcase == 's' # Saves the game
+    return 3 if string.downcase == 'save' || string.downcase == 's' # Saves game
 
     -1
   end
