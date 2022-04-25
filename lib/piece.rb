@@ -15,7 +15,6 @@ class Piece
   end
 
   def initialize(color, has_moved = false, value = value_lookup)
-    # todo
     @color = color # 1 for white, -1 for black
     @has_moved = has_moved
     @value = value
@@ -36,10 +35,6 @@ class Piece
       has_moved: @has_moved,
       value: @value
     }
-  end
-
-  def to_json
-    to_hash.to_json
   end
 
   # Returns true if goal is within board boundary

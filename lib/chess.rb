@@ -40,25 +40,15 @@ class Chess
     puts "last_moved_piece: #{@last_moved_piece}"
   end
 
-  # Dumps board to .json
-  def dump_board
-    dummy_board = Array.new(8) { Array.new(8) }
-    (0..7).each do |y|
-      (0..7).each do |x|
-        dummy_board[y][x] = @board[y][x].dump unless @board[y][x].nil?
-      end
-    end
-    dummy_board
-  end
-
+  # Converts all Pieces on board to hash and returns board
   def hash_board
-    dummy_board = Array.new(8) { Array.new(8) }
+    hashed_board = Array.new(8) { Array.new(8) }
     (0..7).each do |y|
       (0..7).each do |x|
-        dummy_board[y][x] = @board[y][x].to_hash unless @board[y][x].nil?
+        hashed_board[y][x] = @board[y][x].to_hash unless @board[y][x].nil?
       end
     end
-    dummy_board
+    hashed_board
   end
 
   # Generates Piece based off hash values
@@ -81,11 +71,9 @@ class Chess
 
   # Loads board from .json file
   def load_board(data)
-    puts "Input is #{data.to_json}"
     dummy_board = Array.new(8) { Array.new(8) }
     (0..7).each do |y|
       (0..7).each do |x|
-        puts "data is #{data[y][x]}"
         dummy_board[y][x] = generate_piece(data[y][x]) unless data[y][x].nil?
       end
     end
@@ -114,11 +102,10 @@ class Chess
   def load_game(string)
     data = JSON.parse(string)
     @board = load_board(data['board'])
-    #@board = data['board']
     @player = data['player']
     @en_passant = data['en_passant']
     @last_moved_piece = data['last_moved_piece']
-    debug_print
+    # debug_print
   end
 
   # Returns true if the passed location on the board contains
@@ -133,7 +120,6 @@ class Chess
     # Checks location for piece belonging to current player
     if @board[location[0]][location[1]].color != @player
       puts "You can't move someone else's piece!"
-      puts "DEBUG: You tried to move the piece at: #{location}"
       return false
     end
     true
@@ -160,7 +146,6 @@ class Chess
 
   # Checks if current player's King is currently in check.
   def check?
-    # todo
     king = find_king
     opponent = @player * -1
     # Iterate through the board looking for pieces of the opposite color
@@ -315,7 +300,7 @@ class Chess
       else
         next
       end
-
+      # debug_print
       coordinate_pair = Parser.alg_to_array(input)
       location = coordinate_pair[0]
       goal = coordinate_pair[1]
