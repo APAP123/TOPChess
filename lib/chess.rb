@@ -5,13 +5,7 @@ require './lib/parser'
 
 # Class representation of Chess
 class Chess
-  attr_reader :board
-
-  # Simple lookup for getting player colors in string form
-  COLOR = {
-    -1 => 'Black',
-    1 => 'White'
-  }.freeze
+  attr_reader :board, :player
 
   def initialize(board, player = 1)
     @board = board
@@ -38,6 +32,11 @@ class Chess
     puts "Player: #{@player}"
     puts "en_passant: #{@en_passant}"
     puts "last_moved_piece: #{@last_moved_piece}"
+  end
+
+  # Swaps current player
+  def swap_players
+    @player *= -1
   end
 
   # Converts all Pieces on board to hash and returns board
@@ -88,14 +87,6 @@ class Chess
       en_passant: @en_passant,
       last_moved_piece: @last_moved_piece
     })
-  end
-
-  # Saves game as file in working directory
-  def save_game
-    puts 'Save game as?'
-    file = gets.chomp
-    File.open("#{file}.json", 'w') { |f| f.write(dump_json) }
-    puts "Game saved as #{file}.json"
   end
 
   # Loads games from JSON-formatted save
@@ -281,47 +272,6 @@ class Chess
     end
 
     true
-  end
-
-  # Represents one player's turn in a match.
-  def take_turn
-    puts "#{COLOR[@player]} player, please enter your move."
-    loop do
-      input = gets.chomp
-
-      case Parser.read_input(input)
-      when 1
-        # standard format; continue with loop
-      when 2
-        castling(input) ? break : next
-      when 3
-        save_game
-        next
-      else
-        next
-      end
-      # debug_print
-      coordinate_pair = Parser.alg_to_array(input)
-      location = coordinate_pair[0]
-      goal = coordinate_pair[1]
-      next unless valid_turn?(location, goal)
-
-      move_piece(location, goal)
-      break
-    end
-  end
-
-  # Main driver of the game; checks for win conditions, swaps players after each turn.
-  def play
-    loop do
-      draw_board
-      if checkmate?
-        puts "Checkmate! #{COLOR[@player * -1]} wins!"
-        return
-      end
-      take_turn
-      @player *= -1
-    end
   end
 
   # Draws board out to screen
