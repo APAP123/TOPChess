@@ -42,13 +42,13 @@ end
 # Prompts for the amount of human players
 def choose_players
   loop do
-    puts 'how many (human) players?'
-    player_count = gets.chomp
-    unless Parser.valid_players?(player_count)
-      puts 'Invalid amount of players. Please choose 0, 1, or 2.'
-      next
-    end
-    human_players = player_count
+    # puts 'how many (human) players?'
+    # player_count = gets.chomp
+    # unless Parser.valid_players?(player_count)
+    #   puts 'Invalid amount of players. Please choose 0, 1, or 2.'
+    #   next
+    # end
+    # human_players = player_count
     break
   end
 end
@@ -68,6 +68,7 @@ end
         save_game(chess)
         next
       else
+        puts "Invalid format. Please enter move in long algorithmic notation (e.g. a2a3)"
         next
       end
       # debug_print
